@@ -1,6 +1,6 @@
 import pygame
 import sys
-
+import turtle
 # Définit la taille de la grille (carrée)
 grid_size = 10
 
@@ -19,7 +19,7 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("QuoridorTest")
 
 # Couleurs
-# white = (255, 255, 255)
+white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 blue = (0, 0, 255)
