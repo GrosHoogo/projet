@@ -1,6 +1,6 @@
 import pygame
 import sys
-import turtle
+import ramdom
 
 # Définit la taille de la grille (carrée)
 grid_size = 10
