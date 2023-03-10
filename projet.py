@@ -1,6 +1,7 @@
 import pygame
 import sys
-import turtle
+import random
+
 # Définit la taille de la grille (carrée)
 grid_size = 10
 
