@@ -5,7 +5,8 @@ import subprocess
 pygame.init()
 
 # Initialise la fenetre pygame
-window = pygame.display.set_mode((500, 720))
+TAILLE_ECRAN = (1920, 1080)
+fenetre = pygame.display.set_mode(TAILLE_ECRAN, pygame.FULLSCREEN)
 pygame.display.set_caption("Choose the size of the game board")
 
 # Défini les différentes tailles de plateau de jeu
@@ -18,7 +19,7 @@ font = pygame.font.SysFont(None, 30)
 text_objects = [font.render(size, True, (255, 255, 255)) for size in board_sizes]
 
 # Calcule la position de chaque text sur la fenetre
-text_positions = [(250 - text.get_width()//2, 100*i + 200) for i, text in enumerate(text_objects)]
+text_positions = [(TAILLE_ECRAN[0]//2 - text.get_width()//2, TAILLE_ECRAN[1]//2 - text.get_height()//2 + 100*i) for i, text in enumerate(text_objects)]
 
 #Boucle pygame
 clock = pygame.time.Clock()
@@ -42,11 +43,11 @@ while running:
                     running = False
     
     # Nettoie la fenêtre pygame
-    window.fill((0, 0, 0))
+    fenetre.fill((0, 0, 0))
     
     # Affiche les text objects
     for i, text in enumerate(text_objects):
-        window.blit(text, text_positions[i])
+        fenetre.blit(text, text_positions[i])
     
     # Update la fenêtre pygame
     pygame.display.update()
