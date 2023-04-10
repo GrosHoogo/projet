@@ -1,5 +1,6 @@
 import pygame
 import sys
+import subprocess
 
 # Initialisation de Pygame
 pygame.init()
@@ -51,10 +52,9 @@ while True:
                 print("Bouton Jouer cliqué")
                 # Ajouter ici la fonctionnalité souhaitée pour le bouton "Jouer"
                 jouer_fenetre = pygame.display.set_mode((800, 600))
-                pygame.display.set_caption("Jeu")
-                jouer_fenetre.fill(BLANC)
-                # Ajouter ici le code pour afficher le jeu dans la nouvelle fenêtre
-                pygame.display.flip()
+                subprocess.call(["python", "selection.py"])
+                pygame.quit()
+                sys.exit()
             elif bouton_regles.collidepoint(pos):
                 print("Bouton Règles cliqué")
                 # Ajouter ici la fonctionnalité souhaitée pour le bouton "Règles"
