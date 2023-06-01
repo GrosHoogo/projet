@@ -2,8 +2,7 @@ import socket
 from _thread import *
 import sys
 
-
-server = "192.168.1.29" # Modifier IP lorsque je me déplace
+server = "192.168.1.41" #Ecrire votre ip allez dans cmd puis tapez ipconfig
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,13 +12,12 @@ try:
 except socket.error as e:
     str(e)
 
-s.listen(4)
-print("En attente de connexion, Server allumé")
+s.listen(2)
+print("Waiting for a connection, Server Started")
 
 
 def threaded_client(conn):
-
-    conn.send(str.encode("Connecté"))
+    conn.send(str.encode("Connected"))
     reply = ""
     while True:
         try:
@@ -27,22 +25,22 @@ def threaded_client(conn):
             reply = data.decode("utf-8")
 
             if not data:
-                print("Déconnecté")
+                print("Disconnected")
                 break
             else:
-                print("Recue: ", reply)
-                print("Envoi en cours : ", reply)
+                print("Received: ", reply)
+                print("Sending : ", reply)
 
             conn.sendall(str.encode(reply))
         except:
             break
 
-    print("Connexion perdue")
+    print("Lost connection")
     conn.close()
 
 
 while True:
     conn, addr = s.accept()
-    print("Connecter à:", addr)
+    print("Connected to:", addr)
 
     start_new_thread(threaded_client, (conn,))

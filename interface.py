@@ -2,6 +2,7 @@ import pygame
 import sys
 import subprocess
 
+
 # Initialisation de Pygame
 pygame.init()
 
