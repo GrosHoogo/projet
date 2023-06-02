@@ -1,6 +1,7 @@
 import pygame
 import sys
 import subprocess
+from network import Network
 
 
 # Initialisation de Pygame
@@ -20,7 +21,7 @@ pygame.display.set_caption("Interface avec Pygame")
 # Application du background
 #background = pygame.image.load('space.jpg')
 #background.convert()
-#running = True 
+#running = True
 #while running:
     #fenetre.blit(background, (0, 0))
     #pygame.display.flip()
@@ -84,7 +85,7 @@ while True:
     pygame.draw.rect(fenetre, NOIR, bouton_jouer)
     pygame.draw.rect(fenetre, NOIR, bouton_regles)
     pygame.draw.rect(fenetre, NOIR, bouton_parametres)
-    pygame.draw.rect(fenetre, NOIR, bouton_quitter) 
+    pygame.draw.rect(fenetre, NOIR, bouton_quitter)
 
     # Ajout du texte sur les boutons
     font = pygame.font.Font(None, 36)

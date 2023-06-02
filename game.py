@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 # Initialize pygame
 pygame.init()
@@ -7,10 +8,17 @@ pygame.init()
 BLACK = (0, 0, 0)
 GRAY = (128, 128, 128)
 
-# Get board size from command line arguments
-import sys
-board_size_str = sys.argv[1]
-board_size = int(board_size_str.split("x")[0])
+# Set the default board size
+default_board_size = 8
+
+# Get board size from command line arguments or use the default size
+if len(sys.argv) > 1:
+    board_size_str = sys.argv[1]
+    board_size = int(board_size_str.split("x")[0])
+else:
+    board_size = default_board_size
+
+# Rest of the code...
 
 # Define the size of each cell in pixels
 cell_size = 60
