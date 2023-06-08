@@ -1,77 +1,126 @@
 import pygame
 import sys
 
-# Initialize pygame
+# Initialisation de pygame
 pygame.init()
 
-# Define colors
-BLACK = (0, 0, 0)
-GRAY = (128, 128, 128)
+# Définition des couleurs
+NOIR = (0, 0, 0)
+GRIS = (128, 128, 128)
+BLEU = (0, 0, 255)
+ROUGE = (255, 0, 0)
 
-# Set the default board size
-default_board_size = 8
+# Obtenir la taille du plateau à partir des arguments de la ligne de commande
+taille_plateau_str = sys.argv[1]
+taille_plateau = int(taille_plateau_str.split("x")[0])
 
-# Get board size from command line arguments or use the default size
-if len(sys.argv) > 1:
-    board_size_str = sys.argv[1]
-    board_size = int(board_size_str.split("x")[0])
-else:
-    board_size = default_board_size
+# Définition de la taille de chaque cellule en pixels
+taille_cellule = 60
 
-# Rest of the code...
+# Calcul de la taille de la fenêtre en fonction de la taille du plateau et de la taille des cellules
+taille_fenetre = (taille_plateau * taille_cellule + (taille_plateau + 1) * 2, taille_plateau * taille_cellule + (taille_plateau + 1) * 2)
 
-# Define the size of each cell in pixels
-cell_size = 60
+# Initialisation de la fenêtre
+fenetre = pygame.display.set_mode(taille_fenetre)
+pygame.display.set_caption("Plateau de jeu")
 
-# Calculate the size of the window based on the board size and cell size
-window_size = (board_size * cell_size + (board_size + 1) * 2, board_size * cell_size + (board_size + 1) * 2)
+# Initialisez une matrice pour les barrières
+barrieres = [[0 for _ in range(taille_plateau)] for _ in range(taille_plateau)]
 
-# Initialize the window
-window = pygame.display.set_mode(window_size)
-pygame.display.set_caption("Game Board")
+class Pion:
+    def __init__(self, x, y, couleur):
+        self.x = x
+        self.y = y
+        self.couleur = couleur
+        
+    def dessiner(self):
+        pygame.draw.circle(fenetre, self.couleur, (self.x * taille_cellule + taille_cellule//2 + (self.x+1) * 2, self.y * taille_cellule + taille_cellule//2 + (self.y+1) * 2), taille_cellule//3)
+    def peut_se_deplacer_vers(self, x, y):
+        dx = abs(self.x - x)
+        dy = abs(self.y - y)
+        if dx > 1 or dy > 1:
+            # Le pion ne peut pas se déplacer de plus d'une case
+            return False
+        if dx == dy:
+            # Le pion ne peut pas se déplacer en diagonale
+            return False
+        if barrieres[self.y][self.x] == 1:
+            # Il y a une barrière dans la cellule actuelle du pion
+            return False
+        if dx == 1:
+            # Le pion se déplace horizontalement
+            if self.x < x and (barrieres[y][x] == 1 or barrieres[y][x-1] == 1):
+                # Il y a une barrière à droite du pion
+                return False
+            if self.x > x and (barrieres[y][x] == 1 or barrieres[y][x+1] == 1):
+                # Il y a une barrière à gauche du pion
+                return False
+        if dy == 1:
+            # Le pion se déplace verticalement
+            if self.y < y and (barrieres[y][x] == 1 or barrieres[y-1][x] == 1):
+                # Il y a une barrière en bas du pion
+                return False
+            if self.y > y and (barrieres[y][x] == 1 or barrieres[y+1][x] == 1):
+                # Il y a une barrière en haut du pion
+                return False
+        return True
 
-# Set the font for the text
-font = pygame.font.SysFont(None, 30)
 
-# Draw the board
-def draw_board():
-    # Clear the window
-    window.fill(BLACK)
-
-    # Draw the cells
-    for i in range(board_size):
-        for j in range(board_size):
-            # Calculate the position of the cell
-            cell_x = j * cell_size + (j+1) * 2
-            cell_y = i * cell_size + (i+1) * 2
-
-            # Draw the cell
-            pygame.draw.rect(window, GRAY, (cell_x, cell_y, cell_size, cell_size))
-
-    # Draw the vertical lines
-    for i in range(board_size+1):
-        line_x = i * (cell_size + 2)
-        pygame.draw.line(window, BLACK, (line_x, 2), (line_x, window_size[1]-2), 2)
-
-    # Draw the horizontal lines
-    for i in range(board_size+1):
-        line_y = i * (cell_size + 2)
-        pygame.draw.line(window, BLACK, (2, line_y), (window_size[0]-2, line_y), 2)
+# Pions
+pion_bleu = Pion(0, taille_plateau // 2, BLEU)
+pion_rouge = Pion(taille_plateau - 1, taille_plateau // 2, ROUGE)
 
 
-# Draw the board initially
-draw_board()
+class Jeu:
+    # Dessiner le plateau de jeu
+    def dessiner_plateau():
+        # Effacer la fenêtre
+        fenetre.fill(NOIR)
+        
+        # Dessiner les cellules
+        for i in range(taille_plateau):
+            for j in range(taille_plateau):
+                # Calculer la position de la cellule
+                cellule_x = j * taille_cellule + (j+1) * 2
+                cellule_y = i * taille_cellule + (i+1) * 2
+                
+                # Dessiner la cellule
+                pygame.draw.rect(fenetre, GRIS, (cellule_x, cellule_y, taille_cellule, taille_cellule))
 
-# Main game loop
-running = True
-while running:
-    # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        # Dessiner les pions
+        pion_bleu.dessiner()
+        pion_rouge.dessiner()
 
-    # Update the window
-    pygame.display.update()
+    # Boucle principale du jeu
+    en_cours = True
+    pion_selectionne = None
+    while en_cours:
+        # Gérer les événements
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                en_cours = False
+            # Gestion des clics de souris pour déplacer les pions
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                cellule_x, cellule_y = x // (taille_cellule + 2), y // (taille_cellule + 2)
+                if pion_selectionne:
+                    # Si un pion est sélectionné, vérifiez si le déplacement est valide
+                    if pion_selectionne.peut_se_deplacer_vers(cellule_x, cellule_y):
+                        pion_selectionne.x = cellule_x
+                        pion_selectionne.y = cellule_y
+                        pion_selectionne = None
+                else:
+                    # Si aucun pion n'est sélectionné, vérifiez si un pion est cliqué
+                    if cellule_x == pion_bleu.x and cellule_y == pion_bleu.y:
+                        pion_selectionne = pion_bleu
+                    elif cellule_x == pion_rouge.x and cellule_y == pion_rouge.y:
+                        pion_selectionne = pion_rouge
+                        
+        # Redessiner le plateau (avec les pions éventuellement déplacés)
+        dessiner_plateau()
+        
+        # Mettre à jour la fenêtre
+        pygame.display.update()
 
-# Quit pygame
+# Quitter pygame
 pygame.quit()
