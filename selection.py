@@ -41,6 +41,7 @@ while running:
                     # Exécute le fichier "game.py" avec la taille choisie comme argument et ferme la fenêtre
                     subprocess.call(["python", "game.py", board_sizes[i]])
                     running = False
+                    
     
     # Nettoie la fenêtre pygame
     fenetre.fill((0, 0, 0))
@@ -53,4 +54,4 @@ while running:
     pygame.display.update()
 
 # Quitte la fenêtre pygame
-pygame.quit()
+pygame.quit() 
