@@ -1,77 +1,43 @@
 import socket
-from _thread import *
-import sys
+import select
 
-# Adresse IP du serveur
-server = "192.168.110.1"  # Remplacez par votre propre adresse IP, ex : "192.168.0.100"
+hote = ''
+port = 12800
 
-# Port d'écoute du serveur
-port = 5555
+connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+connexion_principale.bind((hote, port))
+connexion_principale.listen(5)
 
-# Création du socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print("Bienvenue sur le serveur Area Online (port : {})".format(port))
 
-try:
-    # Liaison du socket à l'adresse IP et au port
-    s.bind((server, port))
-except socket.error as e:
-    str(e)
+serveur_lance = True
+clients_connectes = []
 
-# Nombre maximal de connexions simultanées
-s.listen(4)
+while serveur_lance:
+    connexions_demandees, wlist, xlist = select.select([connexion_principale], [], [], 0.05)
 
-# Message indiquant que le serveur est en attente de connexions
-print("Waiting for a connection. Server Started")
+    for connexion in connexions_demandees:
+        connexion_avec_client, infos_connexion = connexion.accept()
+        clients_connectes.append(connexion_avec_client)
 
-# Positions des joueurs
-pos = [(0, 0), (100, 100)]
+    clients_a_lire = []
 
+    try:
+        clients_a_lire, wlist, xlist = select.select(clients_connectes, [], [], 0.05)
+    except select.error:
+        pass
+    else:
+        for client in clients_a_lire:
+            msg_recu = client.recv(1024)
+            msg_recu = msg_recu.decode()
+            print("{} .....100%".format(msg_recu))
+            msg_recu = msg_recu.encode()
+            client.send(msg_recu)
+            if msg_recu == b"fin":
+                serveur_lance = False
 
-# Fonction exécutée dans un thread pour gérer la communication avec un client
-def threaded_interface(conn, player):
-    # Envoi de la position initiale du joueur au client
-    conn.send(str.encode(make_pos(pos[player])))
+print("Fermeture des connexions")
+for client in clients_connectes:
+    client.close()
 
-    while True:
-        try:
-            # Réception des données du client
-            data = read_pos(conn.recv(2048).decode())
-            pos[player] = data
-
-            if not data:
-                # Si aucune donnée n'est reçue, le client est déconnecté
-                print("Disconnected")
-                break
-            else:
-                if player == 1:
-                    # Si c'est le joueur 1, envoyer la position du joueur 0 en réponse
-                    reply = pos[0]
-                else:
-                    # Si c'est le joueur 0, envoyer la position du joueur 1 en réponse
-                    reply = pos[1]
-                print("Received:", data)
-                print("Sending:", reply)
-
-            # Envoi de la position mise à jour au client
-            conn.sendall(str.encode(make_pos(reply)))
-        except:
-            break
-
-    # Fermeture de la connexion en cas de perte de connexion avec le client
-    print("Lost connection")
-    conn.close()
-
-
-# Numéro de joueur en cours
-concurrentPlayer = 0
-
-while True:
-    # Attente d'une connexion entrante
-    conn, addr = s.accept()
-    print("Connected to:", addr)
-
-    # Démarrage d'un nouveau thread pour gérer la connexion avec le client
-    start_new_thread(threaded_interface, (conn, concurrentPlayer))
-
-    # Incrémentation du numéro de joueur pour la prochaine connexion
-    concurrentPlayer += 1
+connexion_principale.close()
