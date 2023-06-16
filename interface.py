@@ -1,6 +1,7 @@
 import pygame
 import sys
 from pygame import mixer
+import subprocess
 
 # Initialisation de Pygame
 pygame.init()
@@ -79,6 +80,10 @@ Le premier joueur à atteindre la rangée opposée du plateau avec son pion remp
 Si un joueur bloque complètement le passage de son adversaire avec des barrières de sorte qu'il ne puisse plus avancer, il remporte également la partie.
 """
 
+# Fonction pour lancer la fenêtre de jeu
+def lancer_jeu():
+    subprocess.call(["python", "jeu.py"])  # Remplacez "jeu.py" par le nom de votre fichier de jeu
+
 # Boucle principale du jeu
 while True:
     for event in pygame.event.get():
@@ -94,11 +99,7 @@ while True:
                 if bouton_jouer.collidepoint(pos):
                     print("Bouton Jouer cliqué")
                     # Ajouter ici la fonctionnalité souhaitée pour le bouton "Jouer"
-                    jouer_fenetre = pygame.display.set_mode((800, 600))
-                    pygame.display.set_caption("Jeu")
-                    jouer_fenetre.fill(BLANC)
-                    # Ajouter ici le code pour afficher le jeu dans la nouvelle fenêtre
-                    pygame.display.flip()
+                    lancer_jeu()
                     fenetre_principale_active = False
                 elif bouton_regles.collidepoint(pos):
                     print("Bouton Règles cliqué")
@@ -124,7 +125,7 @@ while True:
                     fenetre_principale_active = True
                     fenetre_regles_active = False
 
-# Affichage de l'image de fond et de la bannière
+    # Affichage de l'image de fond et de la bannière
     fenetre.blit(fond, (0, 0))
     fenetre.blit(banner, banner_rect)
 
@@ -143,13 +144,18 @@ while True:
         fenetre.blit(text_jouer,
                      (pos_x_boutons + largeur_bouton // 2 - text_jouer.get_width() // 2,
                       pos_y_bouton_jouer + hauteur_bouton // 2 - text_jouer.get_height() // 2))
-        fenetre.blit(text_regles, (pos_x_boutons + largeur_bouton // 2 - text_regles.get_width() // 2, pos_y_bouton_jouer + (hauteur_bouton + espacement_boutons) * 1 + hauteur_bouton // 2 - text_regles.get_height() // 2))
-        fenetre.blit(text_quitter, (pos_x_boutons + largeur_bouton // 2 - text_quitter.get_width() // 2, pos_y_bouton_jouer + (hauteur_bouton + espacement_boutons) * 3 + hauteur_bouton // 2 - text_quitter.get_height() // 2))
+        fenetre.blit(text_regles,
+                     (pos_x_boutons + largeur_bouton // 2 - text_regles.get_width() // 2,
+                      pos_y_bouton_jouer + (hauteur_bouton + espacement_boutons) * 1 + hauteur_bouton // 2 - text_regles.get_height() // 2))
+        fenetre.blit(text_quitter,
+                     (pos_x_boutons + largeur_bouton // 2 - text_quitter.get_width() // 2,
+                      pos_y_bouton_jouer + (hauteur_bouton + espacement_boutons) * 3 + hauteur_bouton // 2 - text_quitter.get_height() // 2))
 
     elif fenetre_regles_active:
-        # Affichage du texte de saisie des règles
+        # Affichage du texte des règles
         font_regles = pygame.font.Font(None, 36)
-        text_saisie_regles = font_regles.render(texte_regles, True, NOIR)
+        texte_regles_sans_caracteres_speciaux = ''.join(c for c in texte_regles if c.isprintable())
+        text_saisie_regles = font_regles.render(texte_regles_sans_caracteres_speciaux, True, NOIR)
         regles_fenetre.blit(text_saisie_regles, (50, 50))
 
         # Dessin du bouton "Retour"
