@@ -124,6 +124,11 @@ while running:
             pygame.draw.rect(fenetre, COLOR_UNSELECTED, rect, 2)  # rectangle non rempli pour les non-sélections
             fenetre.blit(barriers_text_objects[i], barriers_text_positions[i])  # texte en blanc pour les non-sélections
 
+        # Affichage du bouton retour
+        pygame.draw.rect(fenetre, NOIR, bouton_retour_base)
+        text_retour = font_bouton.render("Retour", True, BLANC)
+        fenetre.blit(text_retour, (bouton_retour_base.x + 50, bouton_retour_base.y + 10))
+
     # Affiche le rectangle autour du bouton de validation
     pygame.draw.rect(fenetre, COLOR_UNSELECTED, validation_rect_position, 2)
 
