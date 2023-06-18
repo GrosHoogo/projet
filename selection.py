@@ -5,7 +5,7 @@ import subprocess
 pygame.init()
 
 # Initialise la fenetre pygame
-TAILLE_ECRAN = (1920, 1080)
+TAILLE_ECRAN = (700, 700)
 fenetre = pygame.display.set_mode(TAILLE_ECRAN)
 pygame.display.set_caption("Choisissez la taille du plateau, le nombre de joueurs et le nombre de barrières")
 
@@ -45,7 +45,11 @@ selected_num_barriers_index = None
 # Boucle pygame
 clock = pygame.time.Clock()
 
-# Ouvre la fenêtre de selection
+# Charge l'image de fond
+fond = pygame.image.load("fond.jpg")
+fond = pygame.transform.scale(fond, TAILLE_ECRAN)
+
+# Ouvre la fenêtre de sélection
 running = True
 while running:
     # events pygame
@@ -81,8 +85,6 @@ while running:
                     subprocess.call(["python", "game.py", board_sizes[selected_board_size_index], num_players[selected_num_players_index], str(num_barriers[selected_num_barriers_index])])
                     running = False
 
-    # Nettoie la fenêtre pygame
-    fenetre.fill((0, 0, 0))
 
     # Affiche les rectangles autour des text objects
     for i, rect in enumerate(board_rect_positions):
@@ -111,6 +113,11 @@ while running:
         else:
             pygame.draw.rect(fenetre, (255, 255, 255), rect, 2)  # rectangle non rempli pour les non-sélections
             fenetre.blit(barriers_text_objects[i], barriers_text_positions[i])  # texte en blanc pour les non-sélections
+    # Nettoie la fenêtre pygame
+    fenetre.fill((0, 0, 0))
+
+    # Affiche l'image de fond
+    fenetre.blit(fond, (0, 0))
 
     # Affiche le rectangle autour du bouton de validation
     pygame.draw.rect(fenetre, (255, 255, 255), validation_rect_position, 2)
