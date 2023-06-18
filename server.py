@@ -1,43 +1,61 @@
 import socket
-import select
+from _thread import *
+import sys
 
-hote = ''
-port = 12800
+server = "YOUR LOCAL IPV4"
+port = 5555
 
-connexion_principale = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connexion_principale.bind((hote, port))
-connexion_principale.listen(5)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-print("Bienvenue sur le serveur Area Online (port : {})".format(port))
+try:
+    s.bind((server, port))
+except socket.error as e:
+    str(e)
 
-serveur_lance = True
-clients_connectes = []
+s.listen(2)
+print("Waiting for a connection, Server Started")
 
-while serveur_lance:
-    connexions_demandees, wlist, xlist = select.select([connexion_principale], [], [], 0.05)
+def read_pos(str):
+    str = str.split(",")
+    return int(str[0]), int(str[1])
 
-    for connexion in connexions_demandees:
-        connexion_avec_client, infos_connexion = connexion.accept()
-        clients_connectes.append(connexion_avec_client)
 
-    clients_a_lire = []
+def make_pos(tup):
+    return str(tup[0]) + "," + str(tup[1])
 
-    try:
-        clients_a_lire, wlist, xlist = select.select(clients_connectes, [], [], 0.05)
-    except select.error:
-        pass
-    else:
-        for client in clients_a_lire:
-            msg_recu = client.recv(1024)
-            msg_recu = msg_recu.decode()
-            print("{} .....100%".format(msg_recu))
-            msg_recu = msg_recu.encode()
-            client.send(msg_recu)
-            if msg_recu == b"fin":
-                serveur_lance = False
+pos = [(0,0),(100,100)]
 
-print("Fermeture des connexions")
-for client in clients_connectes:
-    client.close()
+def threaded_client(conn, player):
+    conn.send(str.encode(make_pos(pos[player])))
+    reply = ""
+    while True:
+        try:
+            data = read_pos(conn.recv(2048).decode())
+            pos[player] = data
 
-connexion_principale.close()
+            if not data:
+                print("Disconnected")
+                break
+            else:
+                if player == 1:
+                    reply = pos[0]
+                else:
+                    reply = pos[1]
+
+                print("Received: ", data)
+                print("Sending : ", reply)
+
+            conn.sendall(str.encode(make_pos(reply)))
+        except:
+            break
+
+    print("Lost connection")
+    conn.close()
+
+currentPlayer = 0
+while True:
+    conn, addr = s.accept()
+    print("Connected to:", addr)
+
+    start_new_thread(threaded_client, (conn, currentPlayer))
+    currentPlayer += 1
