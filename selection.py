@@ -12,7 +12,7 @@ pygame.display.set_caption("Choisissez la taille du plateau, le nombre de joueur
 # Défini les différentes tailles de plateau de jeu, le nombre de joueurs et le nombre de barrières
 board_sizes = ["5x5", "7x7", "9x9", "11x11"]
 num_players = ["2", "4"]
-num_barriers = list(range(4, 41, 4))  # Select multiples of 4 from 4 to 40
+num_barriers = list(range(4, 41, 4))  # Permet de sélectionner un nb de barrières multiple de 4 entre 4 et 40
 
 # Configure la police d'écriture
 font = pygame.font.SysFont(None, 30)
