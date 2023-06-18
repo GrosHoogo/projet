@@ -82,7 +82,7 @@ Si un joueur bloque complètement le passage de son adversaire avec des barrièr
 
 # Fonction pour lancer la fenêtre de jeu
 def lancer_jeu():
-    subprocess.call(["python", "jeu.py"])  # Remplacez "jeu.py" par le nom de votre fichier de jeu
+    subprocess.call(["python", "game.py"])  # Remplacez "jeu.py" par le nom de votre fichier de jeu
 
 # Boucle principale du jeu
 while True:
