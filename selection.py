@@ -5,7 +5,7 @@ import subprocess
 pygame.init()
 
 # Initialise la fenetre pygame
-TAILLE_ECRAN = (700, 700)
+TAILLE_ECRAN = (1920, 1080)
 fenetre = pygame.display.set_mode(TAILLE_ECRAN)
 pygame.display.set_caption("Choisissez la taille du plateau, le nombre de joueurs et le nombre de barrières")
 
@@ -23,9 +23,9 @@ players_text_objects = [font.render(player, True, (255, 255, 255)) for player in
 barriers_text_objects = [font.render(str(barrier), True, (255, 255, 255)) for barrier in num_barriers]
 
 # Calcule la position de chaque text sur la fenetre
-board_text_positions = [(TAILLE_ECRAN[0]//4 - text.get_width()//2, TAILLE_ECRAN[1]//2 - text.get_height()//2 + 100*i - 60) for i, text in enumerate(board_text_objects)]
-players_text_positions = [(3*TAILLE_ECRAN[0]//4 - text.get_width()//2, TAILLE_ECRAN[1]//2 - text.get_height()//2 + 100*i - 60) for i, text in enumerate(players_text_objects)]
-barriers_text_positions = [(TAILLE_ECRAN[0]//2 - text.get_width()//2, TAILLE_ECRAN[1]//2 - text.get_height()//2 + 50*i - 60) for i, text in enumerate(barriers_text_objects)]
+board_text_positions = [(TAILLE_ECRAN[0]//4 - text.get_width()//2, TAILLE_ECRAN[1]//4 - text.get_height()//2 + 100*i - 60) for i, text in enumerate(board_text_objects)]
+players_text_positions = [(3*TAILLE_ECRAN[0]//4 - text.get_width()//2, TAILLE_ECRAN[1]//4 - text.get_height()//2 + 100*i - 60) for i, text in enumerate(players_text_objects)]
+barriers_text_positions = [(TAILLE_ECRAN[0]//2 - text.get_width()//2, TAILLE_ECRAN[1]//4 - text.get_height()//2 + 50*i - 60) for i, text in enumerate(barriers_text_objects)]
 
 # Calcule la position de chaque rectangle sur la fenetre
 board_rect_positions = [(pos[0] - 10, pos[1] - 10, text.get_width() + 20, text.get_height() + 20) for pos, text in zip(board_text_positions, board_text_objects)]
@@ -34,13 +34,19 @@ barriers_rect_positions = [(pos[0] - 10, pos[1] - 10, text.get_width() + 20, tex
 
 # Crée un bouton de validation
 validation_text = font.render("Valider", True, (255, 255, 255))
-validation_position = (TAILLE_ECRAN[0]//2 - validation_text.get_width()//2, TAILLE_ECRAN[1] - 100)
+validation_position = (TAILLE_ECRAN[0]//2 - validation_text.get_width()//2, TAILLE_ECRAN[1] - 300)
 validation_rect_position = (validation_position[0] - 10, validation_position[1] - 10, validation_text.get_width() + 20, validation_text.get_height() + 20)
 
 # Indices des sélections
 selected_board_size_index = None
 selected_num_players_index = None
 selected_num_barriers_index = None
+
+# Couleurs
+COLOR_SELECTED = (0, 153, 0)  # Vert pour la sélection
+COLOR_UNSELECTED = (255, 255, 255)  # Blanc pour les non-sélections
+COLOR_TEXT_SELECTED = (0, 0, 0)  # Noir pour la sélection
+COLOR_TEXT_UNSELECTED = (255, 255, 255)  # Blanc pour les non-sélections
 
 # Boucle pygame
 clock = pygame.time.Clock()
@@ -49,7 +55,7 @@ clock = pygame.time.Clock()
 fond = pygame.image.load("fond.jpg")
 fond = pygame.transform.scale(fond, TAILLE_ECRAN)
 
-# Ouvre la fenêtre de sélection
+# Ouvre la fenêtre de selection
 running = True
 while running:
     # events pygame
@@ -84,43 +90,42 @@ while running:
                     # Exécute le fichier "game.py" avec les paramètres choisis comme arguments et ferme la fenêtre
                     subprocess.call(["python", "game.py", board_sizes[selected_board_size_index], num_players[selected_num_players_index], str(num_barriers[selected_num_barriers_index])])
                     running = False
+    # Affichage de l'image de fond
+    fenetre.blit(fond, (0, 0))
 
+    # Nettoie la fenêtre pygame
+    fenetre.fill((0, 0, 0))
 
     # Affiche les rectangles autour des text objects
     for i, rect in enumerate(board_rect_positions):
         if i == selected_board_size_index:
-            pygame.draw.rect(fenetre, (255, 255, 255), rect)  # rectangle rempli pour la sélection
-            selected_text = font.render(board_sizes[i], True, (0, 0, 0))  # texte en noir pour la sélection
+            pygame.draw.rect(fenetre, COLOR_SELECTED, rect)  # rectangle rempli pour la sélection
+            selected_text = font.render(board_sizes[i], True, COLOR_TEXT_SELECTED)  # texte en noir pour la sélection
             fenetre.blit(selected_text, board_text_positions[i])
         else:
-            pygame.draw.rect(fenetre, (255, 255, 255), rect, 2)  # rectangle non rempli pour les non-sélections
+            pygame.draw.rect(fenetre, COLOR_UNSELECTED, rect, 2)  # rectangle non rempli pour les non-sélections
             fenetre.blit(board_text_objects[i], board_text_positions[i])  # texte en blanc pour les non-sélections
 
     for i, rect in enumerate(players_rect_positions):
         if i == selected_num_players_index:
-            pygame.draw.rect(fenetre, (255, 255, 255), rect)  # rectangle rempli pour la sélection
-            selected_text = font.render(num_players[i], True, (0, 0, 0))  # texte en noir pour la sélection
+            pygame.draw.rect(fenetre, COLOR_SELECTED, rect)  # rectangle rempli pour la sélection
+            selected_text = font.render(num_players[i], True, COLOR_TEXT_SELECTED)  # texte en noir pour la sélection
             fenetre.blit(selected_text, players_text_positions[i])
         else:
-            pygame.draw.rect(fenetre, (255, 255, 255), rect, 2)  # rectangle non rempli pour les non-sélections
+            pygame.draw.rect(fenetre, COLOR_UNSELECTED, rect, 2)  # rectangle non rempli pour les non-sélections
             fenetre.blit(players_text_objects[i], players_text_positions[i])  # texte en blanc pour les non-sélections
 
     for i, rect in enumerate(barriers_rect_positions):
         if i == selected_num_barriers_index:
-            pygame.draw.rect(fenetre, (255, 255, 255), rect)  # rectangle rempli pour la sélection
-            selected_text = font.render(str(num_barriers[i]), True, (0, 0, 0))  # texte en noir pour la sélection
+            pygame.draw.rect(fenetre, COLOR_SELECTED, rect)  # rectangle rempli pour la sélection
+            selected_text = font.render(str(num_barriers[i]), True, COLOR_TEXT_SELECTED)  # texte en noir pour la sélection
             fenetre.blit(selected_text, barriers_text_positions[i])
         else:
-            pygame.draw.rect(fenetre, (255, 255, 255), rect, 2)  # rectangle non rempli pour les non-sélections
+            pygame.draw.rect(fenetre, COLOR_UNSELECTED, rect, 2)  # rectangle non rempli pour les non-sélections
             fenetre.blit(barriers_text_objects[i], barriers_text_positions[i])  # texte en blanc pour les non-sélections
-    # Nettoie la fenêtre pygame
-    fenetre.fill((0, 0, 0))
-
-    # Affiche l'image de fond
-    fenetre.blit(fond, (0, 0))
 
     # Affiche le rectangle autour du bouton de validation
-    pygame.draw.rect(fenetre, (255, 255, 255), validation_rect_position, 2)
+    pygame.draw.rect(fenetre, COLOR_UNSELECTED, validation_rect_position, 2)
 
     # Affiche le bouton de validation
     fenetre.blit(validation_text, validation_position)
@@ -130,5 +135,3 @@ while running:
 
 # Quitte la fenêtre pygame
 pygame.quit()
-
-
