@@ -45,14 +45,13 @@ class Pion: #Classe comportant tous les méthodes et fonctions relatives aux Pio
         c = Parametres.taille_cellule # Importer la taille de la cellule depuis la classe Parametres
         dx = x - self.x
         dy = y - self.y
-        if abs(dx) > 1 or abs(dy) > 1: 
+        if abs(dx) > 1 or abs(dy) > 1: #Le joueur ne peut se déplacer que d'une case
             return False
-        if abs(dx) == abs(dy): 
-            return False
+        if abs(dx) == abs(dy): #Le joueur ne peut se déplacer en diagonale
         for joueur in joueurs: 
-            if joueur.pion.x == x and joueur.pion.y == y: 
+            if joueur.pion.x == x and joueur.pion.y == y:  #Le joueur ne peut pas poser son pions sur celui d'un autre joueur
                 return False
-        for barriere in Barriere.barrieres:
+        for barriere in Barriere.barrieres: #Le joueur ne peut pas traverser les barrières
             if barriere.orientation == "vertical":
                 if dy == 0:
                     if (self.x == barriere.x - 1 and dx == 1) or (self.x == barriere.x + 1 and dx == -1):
@@ -67,6 +66,7 @@ class Pion: #Classe comportant tous les méthodes et fonctions relatives aux Pio
 
 # Placement des Pions au début du jeu
 tp = Parametres.taille_plateau # Importer la taille du plateau depuis la classe Parametres
+#Définition des paramètres de chaque pion
 pion_bleu = Pion(0, tp // 2, Parametres.BLEU)
 pion_rouge = Pion(tp - 1, tp // 2, Parametres.ROUGE)
 pion_jaune = Pion(tp // 2, 0, Parametres.JAUNE)
@@ -78,7 +78,7 @@ class Barriere: # Classe comportant tous les méthodes et fonctions relatives au
     barrieres = [] # Liste des barrières
     nombre_max_barriere = int(sys.argv[3]) # Nombre max de barrières choisi par l'utilisateur
 
-    def __init__(self, x, y, orientation, couleur):
+    def __init__(self, x, y, orientation, couleur): #Initialisation des paramètres des Barrières
         self.x = x
         self.y = y
         self.orientation = orientation
@@ -93,22 +93,14 @@ class Barriere: # Classe comportant tous les méthodes et fonctions relatives au
         else:  # "vertical"
             pygame.draw.rect(f, self.couleur, ((self.x*c + (self.x+1) * 2, self.y*c + (self.y+1) * 2), (epaisseur, c*2))) # Dessine la barrière Verticalement
 
-    def est_bloque_par_barriere(x, y, orientation):
-        """
-        Cette méthode vérifie si une barrière est présente à une position donnée
-        et dans une orientation donnée ('horizontal' ou 'vertical')
-        """
-        for barriere in Barriere.barrieres:
-            if barriere.x == x and barriere.y == y and barriere.orientation == orientation:
-                return True
-        return False
+    
 
 
 
 
 # Classe joueur pour stocker des informations sur chaque joueur
 class Joueur:
-    def __init__(self, pion, barrieres_restantes, couleur, couleur_nom):
+    def __init__(self, pion, barrieres_restantes, couleur, couleur_nom): #Initialisation des paramètres des Pions
         self.pion = pion
         self.barrieres_restantes = barrieres_restantes
         self.couleur = couleur  # Ajoutez un attribut de couleur
@@ -172,11 +164,11 @@ class Jeu: #Classe comportant tous les méthodes et fonctions relatives au Jeu
                 x, y = event.pos
                 cellule_x, cellule_y = x // (c + 2), y // (c + 2)
                 # Si un pion est sélectionné
-                if joueurs[joueur_en_cours].pion.peut_se_deplacer_vers(cellule_x, cellule_y):
+                if joueurs[joueur_en_cours].pion.peut_se_deplacer_vers(cellule_x, cellule_y): #Vérifie le déplacement du joueur
                     joueurs[joueur_en_cours].pion.x = cellule_x
                     joueurs[joueur_en_cours].pion.y = cellule_y
                     # Changer de tour
-                    joueur_en_cours = (joueur_en_cours + 1) % len(joueurs)
+                    joueur_en_cours = (joueur_en_cours + 1) % len(joueurs) 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                 # Si le joueur a encore des barrières à poser
                 if joueurs[joueur_en_cours].barrieres_restantes > 0:
