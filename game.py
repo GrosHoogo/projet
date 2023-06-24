@@ -31,12 +31,12 @@ class Parametres:  # Classe comportant les différents paramètres pour le Jeu
     fenetre = pygame.display.set_mode(taille_fenetre)
 
 
-class Pion:  # Classe comportant tous les méthodes et fonctions relatives aux Pions
-
-    def __init__(self, x, y, couleur):  # Initialisation des paramètres des pions
-        self.x = x
-        self.y = y
+class Pion:
+    def __init__(self, couleur):
         self.couleur = couleur
+        self.x = 0
+        self.y = 0
+        self.barrieres = []  # Liste pour stocker les barrières actives du pion
 
     def dessiner(self):  # Fonction qui permet de dessiner les pions ou de les redessiner en cas de déplacement
         c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
@@ -45,29 +45,46 @@ class Pion:  # Classe comportant tous les méthodes et fonctions relatives aux P
                            c // 3)  # Dessine un cercle qui représente le Pion
 
     def peut_se_deplacer_vers(self, x, y):
-        c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
-        dx = x - self.x
-        dy = y - self.y
-        if abs(dx) > 1 or abs(dy) > 1:  # Le joueur ne peut se déplacer que d'une case
+        # Vérifier si les coordonnées de destination sont valides
+        if x < 0 or x >= Parametres.taille_plateau or y < 0 or y >= Parametres.taille_plateau:
             return False
-        if abs(dx) == abs(dy):  # Le joueur ne peut pas se déplacer en diagonale
-            for joueur in joueurs:
-                if joueur.pion.x == x and joueur.pion.y == y:  # Le joueur ne peut pas poser son pion sur celui d'un autre joueur
-                    return False
-        for barriere in Barriere.barrieres:  # Le joueur ne peut pas traverser les barrières
-            if (x == barriere.x1 and y == barriere.y1 and self.x == barriere.x2 and self.y == barriere.y2) or (
-                    x == barriere.x2 and y == barriere.y2 and self.x == barriere.x1 and self.y == barriere.y1):
+
+        # Vérifier si les coordonnées de destination sont occupées par une autre pièce ou une barrière
+        for joueur in joueurs:
+            if joueur.pion.x == x and joueur.pion.y == y:
                 return False
+
+        for barriere in Barriere.barrieres:
+            if barriere.orientation == 'H' and (barriere.y == y or barriere.y == y - 1) and (
+                    barriere.x == x or barriere.x == x - 1):
+                return False
+            elif barriere.orientation == 'V' and (barriere.x == x or barriere.x == x - 1) and (
+                    barriere.y == y or barriere.y == y - 1):
+                return False
+
+        # Si toutes les conditions sont remplies, le déplacement est possible
         return True
+
 
 
 # Placement des Pions au début du jeu
 tp = Parametres.taille_plateau  # Importer la taille du plateau depuis la classe Parametres
-# Définition des paramètres de chaque pion
-pion_bleu = Pion(0, tp // 2, Parametres.BLEU)
-pion_rouge = Pion(tp - 1, tp // 2, Parametres.ROUGE)
-pion_jaune = Pion(tp // 2, 0, Parametres.JAUNE)
-pion_vert = Pion(tp // 2, tp - 1, Parametres.VERT)
+
+pion_bleu = Pion(Parametres.BLEU)
+pion_bleu.x = 0  # Remplacez la valeur 0 par la valeur souhaitée
+pion_bleu.y = tp // 2  # Remplacez la valeur tp // 2 par la valeur souhaitée
+
+pion_rouge = Pion(Parametres.ROUGE)
+pion_rouge.x = tp - 1  # Remplacez la valeur tp - 1 par la valeur souhaitée
+pion_rouge.y = tp // 2  # Remplacez la valeur tp // 2 par la valeur souhaitée
+
+pion_vert = Pion(Parametres.VERT)
+pion_vert.x = tp // 2  # Remplacez la valeur tp // 2 par la valeur souhaitée
+pion_vert.y = 0  # Remplacez la valeur 0 par la valeur souhaitée
+
+pion_jaune = Pion(Parametres.JAUNE)
+pion_jaune.x = tp // 2  # Remplacez la valeur tp // 2 par la valeur souhaitée
+pion_jaune.y = tp - 1  # Remplacez la valeur tp - 1 par la valeur souhaitée
 
 
 
@@ -82,10 +99,14 @@ class Barriere:
         self.orientation = orientation
         self.couleur = couleur
         Barriere.barrieres.append(self)
+        self.x1 = 0
+        self.y1 = 0
+        self.x2 = 0  # Ajoutez l'attribut x2
+        self.y2 = 0  # Ajoutez l'attribut y2
 
-
-    def dessiner(self):  # Fonction qui permet de dessiner les barrières ou de les redessiner en cas de déplacement
-        c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
+    def dessiner(self):
+        print(f"Dessiner la barrière aux coordonnées ({self.x1}, {self.y1})")
+        c = Parametres.taille_cellule
         pygame.draw.line(Parametres.fenetre, Parametres.NOIR,
                          (self.x1 * c + c // 2 + (self.x1 + 1) * 2, self.y1 * c + c // 2 + (self.y1 + 1) * 2),
                          (self.x2 * c + c // 2 + (self.x2 + 1) * 2, self.y2 * c + c // 2 + (self.y2 + 1) * 2), 5)
