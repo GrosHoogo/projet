@@ -38,7 +38,7 @@ class Pion:  # Classe comportant tous les méthodes et fonctions relatives aux P
         self.y = y
         self.couleur = couleur
 
-    def dessiner(self):  # Fonction qui permet de dessiner les pions ou les redessiner en cas de déplacement
+    def dessiner(self):  # Fonction qui permet de dessiner les pions ou de les redessiner en cas de déplacement
         c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
         pygame.draw.circle(Parametres.fenetre, self.couleur,
                            (self.x * c + c // 2 + (self.x + 1) * 2, self.y * c + c // 2 + (self.y + 1) * 2),
@@ -50,21 +50,14 @@ class Pion:  # Classe comportant tous les méthodes et fonctions relatives aux P
         dy = y - self.y
         if abs(dx) > 1 or abs(dy) > 1:  # Le joueur ne peut se déplacer que d'une case
             return False
-        if abs(dx) == abs(dy):  # Le joueur ne peut se déplacer en diagonale
+        if abs(dx) == abs(dy):  # Le joueur ne peut pas se déplacer en diagonale
             for joueur in joueurs:
-                if joueur.pion.x == x and joueur.pion.y == y:  # Le joueur ne peut pas poser son pions sur celui d'un autre joueur
+                if joueur.pion.x == x and joueur.pion.y == y:  # Le joueur ne peut pas poser son pion sur celui d'un autre joueur
                     return False
         for barriere in Barriere.barrieres:  # Le joueur ne peut pas traverser les barrières
-            if barriere.orientation == "vertical":
-                if dy == 0:
-                    if (self.x == barriere.x - 1 and dx == 1) or (self.x == barriere.x + 1 and dx == -1):
-                        if abs(self.y * c + c / 2 + (self.y + 1) * 2 - (barriere.y * c + (barriere.y + 1) * 2)) < c:
-                            return False
-            elif barriere.orientation == "horizontal":
-                if dx == 0:
-                    if (self.y == barriere.y - 1 and dy == 1) or (self.y == barriere.y + 1 and dy == -1):
-                        if abs(self.x * c + c / 2 + (self.x + 1) * 2 - (barriere.x * c + (barriere.x + 1) * 2)) < c:
-                            return False
+            if (x == barriere.x1 and y == barriere.y1 and self.x == barriere.x2 and self.y == barriere.y2) or (
+                    x == barriere.x2 and y == barriere.y2 and self.x == barriere.x1 and self.y == barriere.y1):
+                return False
         return True
 
 
@@ -77,31 +70,25 @@ pion_jaune = Pion(tp // 2, 0, Parametres.JAUNE)
 pion_vert = Pion(tp // 2, tp - 1, Parametres.VERT)
 
 
+
+
 class Barriere:
-    barrieres = []  # Liste des barrières
-    nombre_max_barriere = int(sys.argv[3])  # Nombre max de barrières choisi par l'utilisateur
+    nombre_max_barriere = 10  # Remplacez par la valeur souhaitée
+    barrieres = []  # Liste pour stocker les instances de barrières
 
     def __init__(self, x, y, orientation, couleur):
         self.x = x
         self.y = y
         self.orientation = orientation
         self.couleur = couleur
+        Barriere.barrieres.append(self)
 
-    def dessiner(self):
-        c = Parametres.taille_cellule
-        f = Parametres.fenetre
-        epaisseur = 4
 
-        if len(Barriere.barrieres) < Barriere.nombre_max_barriere:
-            if self.orientation == "horizontal":
-                pygame.draw.rect(f, self.couleur, ((self.x * c + (self.x + 1) * 2, self.y * c + (self.y + 1) * 2),
-                                                   (c * 2, epaisseur)))
-            else:  # "vertical"
-                pygame.draw.rect(f, self.couleur, ((self.x * c + (self.x + 1) * 2, self.y * c + (self.y + 1) * 2),
-                                                   (epaisseur, c * 2)))
-
-            Barriere.barrieres.append(self)
-
+    def dessiner(self):  # Fonction qui permet de dessiner les barrières ou de les redessiner en cas de déplacement
+        c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
+        pygame.draw.line(Parametres.fenetre, Parametres.NOIR,
+                         (self.x1 * c + c // 2 + (self.x1 + 1) * 2, self.y1 * c + c // 2 + (self.y1 + 1) * 2),
+                         (self.x2 * c + c // 2 + (self.x2 + 1) * 2, self.y2 * c + c // 2 + (self.y2 + 1) * 2), 5)
 
 
 # Classe joueur pour stocker des informations sur chaque joueur
