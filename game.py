@@ -77,27 +77,31 @@ pion_jaune = Pion(tp // 2, 0, Parametres.JAUNE)
 pion_vert = Pion(tp // 2, tp - 1, Parametres.VERT)
 
 
-class Barriere:  # Classe comportant tous les méthodes et fonctions relatives aux Barrières
-    # Initialisation des barrières
+class Barriere:
     barrieres = []  # Liste des barrières
     nombre_max_barriere = int(sys.argv[3])  # Nombre max de barrières choisi par l'utilisateur
 
-    def __init__(self, x, y, orientation, couleur):  # Initialisation des paramètres des Barrières
+    def __init__(self, x, y, orientation, couleur):
         self.x = x
         self.y = y
         self.orientation = orientation
-        self.couleur = couleur  # Définir la couleur de la barrière
+        self.couleur = couleur
 
-    def dessiner(self):  # Fonction pour dessiner les barrières
-        c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
-        f = Parametres.fenetre  # De même pour la fenetre
-        epaisseur = 4  # Définir l'épaisseur des barrières
-        if self.orientation == "horizontal":
-            pygame.draw.rect(f, self.couleur, ((self.x * c + (self.x + 1) * 2, self.y * c + (self.y + 1) * 2),
-                                               (c * 2, epaisseur)))  # Dessine la barrière Horizontalement
-        else:  # "vertical"
-            pygame.draw.rect(f, self.couleur, ((self.x * c + (self.x + 1) * 2, self.y * c + (self.y + 1) * 2),
-                                               (epaisseur, c * 2)))  # Dessine la barrière Verticalement
+    def dessiner(self):
+        c = Parametres.taille_cellule
+        f = Parametres.fenetre
+        epaisseur = 4
+
+        if len(Barriere.barrieres) < Barriere.nombre_max_barriere:
+            if self.orientation == "horizontal":
+                pygame.draw.rect(f, self.couleur, ((self.x * c + (self.x + 1) * 2, self.y * c + (self.y + 1) * 2),
+                                                   (c * 2, epaisseur)))
+            else:  # "vertical"
+                pygame.draw.rect(f, self.couleur, ((self.x * c + (self.x + 1) * 2, self.y * c + (self.y + 1) * 2),
+                                                   (epaisseur, c * 2)))
+
+            Barriere.barrieres.append(self)
+
 
 
 # Classe joueur pour stocker des informations sur chaque joueur
@@ -124,15 +128,15 @@ joueurs = [joueur_bleu, joueur_rouge]
 if Parametres.nb_players == 4:
     joueurs.extend([joueur_jaune, joueur_vert])
 
-# Définir le joueur en cours
-joueur_en_cours = 0
 
-class Jeu:  # Classe comportant tous les méthodes et fonctions relatives au Jeu
+
+class Jeu:
     def __init__(self):
         self.taille_plateau_str = sys.argv[0] if len(sys.argv) > 0 else ""
         self.taille_plateau_int = int(self.taille_plateau_str) if self.taille_plateau_str.isdigit() else 0
+
     @staticmethod
-    def dessiner_plateau():  # Dessiner le plateau de jeu
+    def dessiner_plateau():
         Parametres.fenetre.fill(Parametres.NOIR)  # Effacement de la fenêtre
         c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
         for i in range(Parametres.taille_plateau):  # Dessiner les cellules
@@ -155,77 +159,80 @@ class Jeu:  # Classe comportant tous les méthodes et fonctions relatives au Jeu
         pygame.draw.rect(Parametres.fenetre, Parametres.GRIS,
                          (Parametres.taille_fenetre[0] - 200, 0, 200, Parametres.taille_fenetre[1]))
 
-
+    @staticmethod
     def effacer_fenetre():
         Parametres.fenetre.fill(Parametres.NOIR)
 
-    en_cours = True  # Défini si le jeu est encore en cours ou non
-    c = Parametres.taille_cellule  # Importer la taille de la cellule depuis la classe Parametres
-    while en_cours:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # Si la fenêtre est quittée, arrêter la boucle
-                en_cours = False
-                # Autres codes...
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+joueur_en_cours = 0
+joueur_actif = joueurs[joueur_en_cours]
+en_cours = True
+c = Parametres.taille_cellule
+
+jeu = Jeu()  # Créer une instance de la classe Jeu
+
+while en_cours:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            en_cours = False
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            x, y = event.pos
+            cellule_x, cellule_y = x // (c + 2), y // (c + 2)
+            # Si un pion est sélectionné
+            if joueurs[joueur_en_cours].pion.peut_se_deplacer_vers(cellule_x, cellule_y):
+                joueurs[joueur_en_cours].pion.x = cellule_x
+                joueurs[joueur_en_cours].pion.y = cellule_y
+                # Changer de tour
+                joueur_en_cours = (joueur_en_cours + 1) % len(joueurs)
+                joueur_actif = joueurs[joueur_en_cours]  # Mettre à jour le joueur actif
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            if joueurs[joueur_en_cours].barrieres_restantes > 0:
                 x, y = event.pos
                 cellule_x, cellule_y = x // (c + 2), y // (c + 2)
-                # Si un pion est sélectionné
-                if joueurs[joueur_en_cours].pion.peut_se_deplacer_vers(cellule_x,
-                                                                       cellule_y):  # Vérifie le déplacement du joueur
-                    joueurs[joueur_en_cours].pion.x = cellule_x
-                    joueurs[joueur_en_cours].pion.y = cellule_y
+                if len(Barriere.barrieres) < Barriere.nombre_max_barriere:
+                    if abs(x - (cellule_x * (c + 2) + c / 2)) > abs(y - (cellule_y * (c + 2) + c / 2)):
+                        orientation = "vertical"
+                    else:
+                        orientation = "horizontal"
+                    nouvelle_barriere = Barriere(cellule_x, cellule_y, orientation, joueurs[joueur_en_cours].couleur)
+                    Barriere.barrieres.append(nouvelle_barriere)
+                    # Réduire le nombre de barrières restantes pour le joueur
+                    joueurs[joueur_en_cours].barrieres_restantes -= 1
                     # Changer de tour
                     joueur_en_cours = (joueur_en_cours + 1) % len(joueurs)
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                # Si le joueur a encore des barrières à poser
-                if joueurs[joueur_en_cours].barrieres_restantes > 0:
-                    x, y = event.pos
-                    cellule_x, cellule_y = x // (c + 2), y // (c + 2)
-                    if len(Barriere.barrieres) < Barriere.nombre_max_barriere:
-                        if abs(x - (cellule_x * (c + 2) + c / 2)) > abs(y - (cellule_y * (c + 2) + c / 2)):
-                            orientation = "vertical"
-                        else:
-                            orientation = "horizontal"
-                        nouvelle_barriere = Barriere(cellule_x, cellule_y, orientation,
-                                                     joueurs[joueur_en_cours].couleur)
-                        Barriere.barrieres.append(nouvelle_barriere)
-                        # Réduire le nombre de barrières restantes pour le joueur
-                        joueurs[joueur_en_cours].barrieres_restantes -= 1
-                        # Changer de tour
-                        joueur_en_cours = (joueur_en_cours + 1) % len(joueurs)
+                    joueur_actif = joueurs[joueur_en_cours]  # Mettre à jour le joueur actif
 
-        # Redessiner le plateau (avec les pions éventuellement déplacés)
-        dessiner_plateau()
-        for barriere in Barriere.barrieres:
-            barriere.dessiner()
+    jeu.dessiner_plateau()  # Appel à la méthode dessiner_plateau() de l'instance jeu
 
-        # Mise à jour du tour du joueur dans le menu de droite
-        pygame.draw.rect(Parametres.fenetre, Parametres.GRIS,
-                         (Parametres.taille_fenetre[0] - 200, 0, 200, Parametres.taille_fenetre[1]))
-        text = font.render("Tour du Joueur " + joueurs[joueur_en_cours].couleur_nom, True, Parametres.NOIR)
-        Parametres.fenetre.blit(text, (Parametres.taille_fenetre[0] - 190, 10))
-        # Mise à jour du nombre de barrières restantes au joueur dans le menu de droite
-        text_barrieres = font.render("Barrières restantes : " + str(joueurs[joueur_en_cours].barrieres_restantes), True,
-                                     Parametres.NOIR)
-        Parametres.fenetre.blit(text_barrieres, (Parametres.taille_fenetre[0] - 190, 40))
+    for barriere in Barriere.barrieres:
+        barriere.dessiner()
 
-        # Vérification de la victoire
-        for joueur in joueurs:
-            victoire_texte = font.render(
-                "Bravo joueur " + joueurs[joueur_en_cours - 1].couleur_nom + ", vous avez gagné !", True,
-                joueurs[joueur_en_cours - 1].couleur)
-            if joueur.pion.x == Parametres.taille_plateau - 1 and joueur.couleur == Parametres.BLEU:
-                effacer_fenetre()
-                Parametres.fenetre.blit(victoire_texte, (50, 200))
-            elif joueur.pion.x == 0 and joueur.couleur == Parametres.ROUGE:
-                effacer_fenetre()
-                Parametres.fenetre.blit(victoire_texte, (50, 200))
-            elif joueur.pion.y == Parametres.taille_plateau - 1 and joueur.couleur == Parametres.JAUNE:
-                effacer_fenetre()
-                Parametres.fenetre.blit(victoire_texte, (50, 200))
-            elif joueur.pion.y == 0 and joueur.couleur == Parametres.VERT:
-                effacer_fenetre()
-                Parametres.fenetre.blit(victoire_texte, (50, 200))
+    # Mise à jour du tour du joueur dans le menu de droite
+    pygame.draw.rect(Parametres.fenetre, Parametres.GRIS,
+                     (Parametres.taille_fenetre[0] - 200, 0, 200, Parametres.taille_fenetre[1]))
+    text = font.render("Tour du Joueur " + joueurs[joueur_en_cours].couleur_nom, True, Parametres.NOIR)
+    Parametres.fenetre.blit(text, (Parametres.taille_fenetre[0] - 190, 10))
 
-        # Mettre à jour la fenêtre
-        pygame.display.update()
+    # Mise à jour du nombre de barrières restantes au joueur dans le menu de droite
+    text_barrieres = font.render("Barrières restantes : " + str(joueurs[joueur_en_cours].barrieres_restantes), True,
+                                 Parametres.NOIR)
+    Parametres.fenetre.blit(text_barrieres, (Parametres.taille_fenetre[0] - 190, 40))
+
+    # Vérification de la victoire
+    for joueur in joueurs:
+        victoire_texte = font.render("Bravo joueur " + joueurs[joueur_en_cours - 1].couleur_nom + ", vous avez gagné !",
+                                     True, joueurs[joueur_en_cours - 1].couleur)
+        if joueur.pion.x == Parametres.taille_plateau - 1 and joueur.couleur == Parametres.BLEU:
+            effacer_fenetre()
+            Parametres.fenetre.blit(victoire_texte, (50, 200))
+        elif joueur.pion.x == 0 and joueur.couleur == Parametres.ROUGE:
+            effacer_fenetre()
+            Parametres.fenetre.blit(victoire_texte, (50, 200))
+        elif joueur.pion.y == Parametres.taille_plateau - 1 and joueur.couleur == Parametres.JAUNE:
+            effacer_fenetre()
+            Parametres.fenetre.blit(victoire_texte, (50, 200))
+        elif joueur.pion.y == 0 and joueur.couleur == Parametres.VERT:
+            effacer_fenetre()
+            Parametres.fenetre.blit(victoire_texte, (50, 200))
+
+    # Mettre à jour l'affichage
+    pygame.display.update()
